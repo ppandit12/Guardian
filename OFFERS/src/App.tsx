@@ -1,6 +1,8 @@
+import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CustomCursor } from "@/components/site/CustomCursor";
 import { ScrollToTop } from "@/components/site/ScrollToTop";
+import { PageLoader } from "@/components/site/PageLoader";
 import { QuoteModalProvider } from "@/context/QuoteModalContext";
 import Home from "@/pages/Home";
 import About from "@/pages/About";
@@ -13,10 +15,25 @@ import Contact from "@/pages/Contact";
 import AdminDashboard from "@/pages/AdminDashboard";
 import NotFound from "@/pages/NotFound";
 
+const LOADER_DISPLAY_MS = 1200;
+
 export default function App() {
+  const [showLoader, setShowLoader] = useState(true);
+  const [fadingOut, setFadingOut] = useState(false);
+
+  useEffect(() => {
+    const fadeTimer = setTimeout(() => {
+      setFadingOut(true);
+      setTimeout(() => setShowLoader(false), 500);
+    }, LOADER_DISPLAY_MS);
+
+    return () => clearTimeout(fadeTimer);
+  }, []);
+
   return (
     <BrowserRouter>
       <QuoteModalProvider>
+        {showLoader && <PageLoader fadingOut={fadingOut} />}
         <ScrollToTop />
         <CustomCursor />
         <Routes>
