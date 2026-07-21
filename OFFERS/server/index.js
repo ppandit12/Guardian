@@ -20,12 +20,16 @@ const PORT = process.env.PORT || 5000;
 const DB_HOST = process.env.DB_HOST || "localhost";
 const DB_PORT = parseInt(process.env.DB_PORT || "3306", 10);
 const DB_USER = process.env.DB_USER || "root";
-const DB_PASSWORD = process.env.DB_PASSWORD || "2mMc9JYJYR@i7tpttt";
+const DB_PASSWORD = process.env.DB_PASSWORD || "";
 const DB_NAME = process.env.DB_NAME || "guardianworks_db";
 
-const GMAIL_USER = process.env.GMAIL_USER || "automation.kyptronix@gmail.com";
-const GMAIL_PASS = (process.env.GMAIL_APP_PASSWORD || "edzk vpit gabs ckto").replace(/\s+/g, "");
+const GMAIL_USER = process.env.GMAIL_USER || "";
+const GMAIL_PASS = (process.env.GMAIL_APP_PASSWORD || "").replace(/\s+/g, "");
 const DESTINATION_EMAIL = process.env.DESTINATION_EMAIL || "adas1594@gmail.com";
+
+if (!GMAIL_USER || !GMAIL_PASS) {
+  console.warn("  WARNING: GMAIL_USER / GMAIL_APP_PASSWORD not set in .env — emails will fail to send.");
+}
 
 // Uploads Directory
 const UPLOADS_DIR = path.join(__dirname, "uploads");

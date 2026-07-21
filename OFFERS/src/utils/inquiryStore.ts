@@ -29,13 +29,8 @@ export function getInquiries(): Inquiry[] {
 }
 
 export async function fetchBackendInquiries(): Promise<Inquiry[]> {
-  const isLocal = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
-  if (!isLocal) {
-    return getInquiries();
-  }
-
   try {
-    const res = await fetch("http://127.0.0.1:5000/api/inquiries");
+    const res = await fetch("/api/inquiries");
     if (res.ok) {
       const data = await res.json();
       if (data.success && Array.isArray(data.inquiries)) {
@@ -73,18 +68,14 @@ export async function saveInquiry(inquiryData: Omit<Inquiry, "id" | "timestamp" 
     console.warn("Could not save quote to localStorage:", err);
   }
 
-  // Only dispatch to Express backend if running locally
-  const isLocal = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
-  if (isLocal) {
-    fetch("http://127.0.0.1:5000/api/quotes", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(inquiryData),
-    })
-      .then((res) => res.json())
-      .then((result) => console.log("Local backend quote dispatch result:", result))
-      .catch((err) => console.warn("Local backend quote dispatch notice:", err));
-  }
+  fetch("/api/quotes", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(inquiryData),
+  })
+    .then((res) => res.json())
+    .then((result) => console.log("Backend quote dispatch result:", result))
+    .catch((err) => console.warn("Backend quote dispatch notice:", err));
 
   return newInquiry;
 }
@@ -128,28 +119,24 @@ export async function saveCareerApplication(data: {
     console.warn("LocalStorage quota reached when saving career application:", err);
   }
 
-  // Only dispatch to Express backend if running locally
-  const isLocal = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
-  if (isLocal) {
-    const formData = new FormData();
-    formData.append("fullName", data.fullName);
-    formData.append("email", data.email);
-    formData.append("phone", data.phone);
-    formData.append("roleApplied", data.roleApplied);
-    formData.append("coverStatement", data.coverStatement);
+  const formData = new FormData();
+  formData.append("fullName", data.fullName);
+  formData.append("email", data.email);
+  formData.append("phone", data.phone);
+  formData.append("roleApplied", data.roleApplied);
+  formData.append("coverStatement", data.coverStatement);
 
-    if (data.cvFileObj) {
-      formData.append("cvFile", data.cvFileObj, data.cvFileObj.name);
-    }
-
-    fetch("http://127.0.0.1:5000/api/careers", {
-      method: "POST",
-      body: formData,
-    })
-      .then((res) => res.json())
-      .then((result) => console.log("Local backend career dispatch result:", result))
-      .catch((err) => console.warn("Local backend career dispatch notice:", err));
+  if (data.cvFileObj) {
+    formData.append("cvFile", data.cvFileObj, data.cvFileObj.name);
   }
+
+  fetch("/api/careers", {
+    method: "POST",
+    body: formData,
+  })
+    .then((res) => res.json())
+    .then((result) => console.log("Backend career dispatch result:", result))
+    .catch((err) => console.warn("Backend career dispatch notice:", err));
 
   return newApplication;
 }
@@ -157,12 +144,9 @@ export async function saveCareerApplication(data: {
 export function clearInquiries(): void {
   try {
     localStorage.removeItem(STORAGE_KEY);
-    const isLocal = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
-    if (isLocal) {
-      fetch("http://127.0.0.1:5000/api/inquiries", { method: "DELETE" }).catch((err) =>
-        console.warn("Backend clear notice:", err)
-      );
-    }
+    fetch("/api/inquiries", { method: "DELETE" }).catch((err) =>
+      console.warn("Backend clear notice:", err)
+    );
   } catch (err) {
     console.error("Failed to clear inquiries:", err);
   }
